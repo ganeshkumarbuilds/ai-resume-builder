@@ -1,11 +1,11 @@
-# 📄 AI Resume Builder
+# AI Resume Builder
 
-## 🚀 Overview
+# Overview
 AI Resume Builder is a full-stack web application that generates professional resumes using AI. Users can enter details and instantly get a formatted resume.
 
 ---
 
-## ✨ Features
+## Features
 - AI-powered resume generation
 - Editable resume content
 - Download resume as PDF
@@ -14,7 +14,7 @@ AI Resume Builder is a full-stack web application that generates professional re
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 - Frontend: React / Vite
 - Backend: Node.js, Express
 - AI: OpenAI / Pollinations API
@@ -22,13 +22,13 @@ AI Resume Builder is a full-stack web application that generates professional re
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 client → Frontend  
 server → Backend  
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 ```bash
 git clone https://github.com/ganeshkumarbuilds/ai-resume-builder.git
