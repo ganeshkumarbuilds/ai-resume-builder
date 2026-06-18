@@ -20,6 +20,13 @@ app.get("/test-ats", (req, res) => {
   res.json({ message: "ATS route working" });
 });
 
+app.get("/debug-routes", (req, res) => {
+  res.json({
+    atsRoute: "/api/resumes/ats/:resumeId",
+    deployed: true,
+    time: new Date(),
+  });
+});
 const startServer = async () => {
     await connectDB();
     app.listen(PORT, () => {
