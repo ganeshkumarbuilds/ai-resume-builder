@@ -261,7 +261,7 @@ const generateQuestions = async () => {
         <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all'>
         <ArrowLeftIcon className='size-4'/>Back to Dashboard</Link>
       </div>
-      <div className='max-w-[1800px] mx-auto px-4 pb-8'>
+      <div className='max-w-[2200px] mx-auto px-4 pb-8'>
         <div className='grid lg:grid-cols-12  gap-8'>
           {/* Left Panel - Form */}
           <div className='relative lg:col-span-4 rounded-lg overflow-hidden'>
@@ -359,13 +359,13 @@ const generateQuestions = async () => {
 
             <div className="grid lg:grid-cols-10 gap-4">
 
-              <div className="lg:col-span-6">
-                <div id="resume-preview-container">
+              <div className="lg:col-span-7">
+                <div id="resume-preview-container" className='w-full flex justify-center' >
                   <ResumePreview data={resumeData} template={resumeData.template} accentColor={resumeData.accent_color}/>
                 </div>
               </div>
 
-              <div className="lg:col-span-4 space-y-4">
+              <div className="lg:col-span-3 space-y-4">
 
                 <div className="bg-white rounded-lg shadow p-4">
                   <h2 className="text-lg font-bold mb-2">Job Description Match</h2>

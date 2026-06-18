@@ -8,10 +8,13 @@ const Navbar = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const logoutuser = () =>{
-        dispatch(logout())
-        navigate('/')
-    }
+    const logoutuser = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.clear();
+
+  window.location.href = "/";
+};
   
     return (
   <div className='shadow bg-white'>
