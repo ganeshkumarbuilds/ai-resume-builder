@@ -35,6 +35,15 @@ const ResumeSchema = new mongoose.Schema({
             
         }
     ],
+    atsScore: {
+  type: Number,
+  default: 0,
+},
+
+atsSuggestions: {
+  type: [String],
+  default: [],
+},
     education:[
         {
             institution: {type: String},

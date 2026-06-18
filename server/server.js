@@ -16,6 +16,9 @@ app.get('/', (req, res) => res.send("Server is live..."))
 app.use('/api/users', userRouter)
 app.use('/api/resumes', resumeRouter)
 app.use('/api/ai', aiRouter)
+app.get("/test-ats", (req, res) => {
+  res.json({ message: "ATS route working" });
+});
 
 const startServer = async () => {
     await connectDB();

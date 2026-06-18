@@ -48,6 +48,8 @@ const loadExistingResume = async () => {
 
 const [activeSectionIndex, setActiveSectionIndex] = useState(0)
 const [removeBackground, setRemoveBackground] = useState(false); 
+const [atsScore, setAtsScore] = useState(null);
+const [atsSuggestions, setAtsSuggestions] = useState([]);
 
 const sections = [
   { id: "personal",name: "Personal Info", icon: User },
@@ -124,6 +126,34 @@ const saveChanges = async () => {
         console.error('Status:', error.response?.status);
         toast.error(error.response?.data?.message || 'Failed to save');
     }
+};
+
+const analyzeATS = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    console.log("TOKEN:", token);
+    console.log("RESUME ID:", resumeId);
+
+    const { data } = await api.get(
+      `/api/resumes/ats/${resumeId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("ATS RESPONSE:", data);
+
+    setAtsScore(data.score);
+    setAtsSuggestions(data.suggestions);
+
+    toast.success("ATS Analysis Complete");
+  } catch (error) {
+    console.log("ATS ERROR:", error.response?.data);
+    toast.error(error.response?.data?.message || "Failed to analyze ATS");
+  }
 };
 
 
@@ -223,6 +253,7 @@ const saveChanges = async () => {
                   {resumeData.public ? <EyeIcon className='size-4'/> : <EyeOffIcon  className='size-4'/>}
                   {resumeData.public ? 'public' : 'private'}
                 </button>
+                <button onClick={analyzeATS} className="flex items-center gap-2 p-2 px-5 py-2 font-semibold text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">ATS Score</button>
                 <button  onClick={downloadResume} className='flex items-center gap-2 p-2 px-5 py-2 font-semibold text-sm bg-green-400 text-green-600
                 rounded-lg ring-green-300 hover:ring transition-colors text-slate-700 '>
                   <DownloadIcon className='size-4'/>Download
@@ -230,6 +261,19 @@ const saveChanges = async () => {
 
               </div>
             </div>
+            {atsScore !== null && (
+  <div className="mb-4 bg-white rounded-lg shadow p-4">
+    <h2 className="text-xl font-bold mb-2">
+      ATS Score: {atsScore}/100
+    </h2>
+
+    <ul className="list-disc ml-6">
+      {atsSuggestions.map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  </div>
+)}
             <div id="resume-preview-container">
               <ResumePreview data={resumeData} template={resumeData.template} accentColor={resumeData.accent_color}/>
             </div>
