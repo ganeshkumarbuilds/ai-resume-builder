@@ -155,10 +155,14 @@ export const UpdateResume = async(req, res) => {
         
 
 export const analyzeATS = async (req, res) => {
+     console.log("ATS FUNCTION HIT");
   try {
     const { resumeId } = req.params;
+    console.log("ATS RESUME ID:", resumeId);
 
     const resume = await Resume.findById(resumeId);
+    console.log("ATS NAME:", resume?.personal_info?.full_name);
+console.log("ATS EMAIL:", resume?.personal_info?.email);
     console.log("ATS RESUME DATA:");
 console.log(JSON.stringify(resume, null, 2));
 

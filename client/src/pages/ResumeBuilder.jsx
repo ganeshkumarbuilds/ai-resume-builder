@@ -38,7 +38,7 @@ const loadExistingResume = async () => {
       Authorization: token }})
       if(data.resume){
         setResumeData(data.resume)
-        document.title = data.resume.title;
+        document.title = "ResumeAI";
       }
   } catch (error) {
     console.log(error.message)
@@ -50,6 +50,12 @@ const [activeSectionIndex, setActiveSectionIndex] = useState(0)
 const [removeBackground, setRemoveBackground] = useState(false); 
 const [atsScore, setAtsScore] = useState(null);
 const [atsSuggestions, setAtsSuggestions] = useState([]);
+const [jobDescription, setJobDescription] = useState("");
+const [jobMatch, setJobMatch] = useState(null);
+const [companyName, setCompanyName] = useState("");
+const [jobTitle, setJobTitle] = useState("");
+const [coverLetter, setCoverLetter] = useState("");
+const [interviewQuestions, setInterviewQuestions] =useState(null);
 
 const sections = [
   { id: "personal",name: "Personal Info", icon: User },
@@ -101,42 +107,31 @@ const handleShare = () => {
 }
 
 const saveChanges = async () => {
-    try {
-        console.log('Saving with resumeId:', resumeId);
-        let dataToSend = { ...resumeData };
-        delete dataToSend._id;
-
-        if (dataToSend.personal_info?.image instanceof File) {
-            delete dataToSend.personal_info.image;
-        }
-
-        const cleanData = JSON.parse(JSON.stringify(dataToSend));
-
-        const { data } = await api.put(`/api/resumes/update/${resumeId}`, 
-            { resumeData: cleanData },
-            { 
-                headers: { Authorization: `Bearer ${token}` } 
-            }
-        );
-
-        setResumeData(data.resume);
-        toast.success('Saved successfully');
-    } catch (error) {
-        console.error('Save error URL:', error.config?.url);
-        console.error('Status:', error.response?.status);
-        toast.error(error.response?.data?.message || 'Failed to save');
-    }
-};
-
-const analyzeATS = async () => {
   try {
-    const token = localStorage.getItem("token");
+    console.log("Saving with resumeId:", resumeId);
 
-    console.log("TOKEN:", token);
-    console.log("RESUME ID:", resumeId);
+    let dataToSend = { ...resumeData };
 
-    const { data } = await api.get(
-      `/api/resumes/ats/${resumeId}`,
+    delete dataToSend._id;
+
+    if (dataToSend.personal_info?.image instanceof File) {
+      delete dataToSend.personal_info.image;
+    }
+
+    const cleanData = JSON.parse(
+      JSON.stringify(dataToSend)
+    );
+
+    console.log("DATA BEING SAVED:");
+    console.log(
+      JSON.stringify(cleanData, null, 2)
+    );
+
+    const { data } = await api.put(
+      `/api/resumes/update/${resumeId}`,
+      {
+        resumeData: cleanData,
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -144,29 +139,132 @@ const analyzeATS = async () => {
       }
     );
 
-    console.log("ATS RESPONSE:", data);
+    console.log("SERVER RESPONSE:");
+    console.log(data);
 
-    setAtsScore(data.score);
-    setAtsSuggestions(data.suggestions);
+    setResumeData(data.resume);
 
-    toast.success("ATS Analysis Complete");
+    toast.success("Saved successfully");
   } catch (error) {
-    console.log("ATS ERROR:", error.response?.data);
-    toast.error(error.response?.data?.message || "Failed to analyze ATS");
+    console.error("SAVE ERROR:", error);
+    console.error(
+      "SERVER ERROR:",
+      error.response?.data
+    );
+
+    toast.error(
+      error.response?.data?.message ||
+      "Failed to save"
+    );
   }
 };
 
+const analyzeATS = async () => {
+  try {
+    const { data } = await api.get(
+      `/api/resumes/ats/${resumeId}`
+    );
+
+    console.log("ATS RESPONSE:", data);
+
+    setAtsScore(data.score || 0);
+    setAtsSuggestions(data.suggestions || []);
+
+    toast.success("ATS Analysis Complete");
+  } catch (error) {
+    console.log("ATS ERROR:", error);
+    console.log("SERVER RESPONSE:", error.response?.data);
+
+    toast.error(
+      error.response?.data?.message || "Failed to analyze ATS"
+    );
+  }
+};
+
+const analyzeJobMatch = async () => {
+  try {
+    const { data } = await api.post(
+      "/api/ai/job-match",
+      {
+        resumeData,
+        jobDescription,
+      }
+    );
+
+    setJobMatch(data);
+
+    toast.success("Job Match Analysis Complete");
+  } catch (error) {
+    console.log(error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Failed to analyze Job Match"
+    );
+  }
+};
+
+const generateCoverLetter = async () => {
+  try {
+    const { data } = await api.post(
+      "/api/ai/cover-letter",
+      {
+        companyName,
+        jobTitle,
+        jobDescription,
+        resumeData,
+      }
+    );
+
+    setCoverLetter(data.coverLetter);
+
+    toast.success(
+      "Cover Letter Generated Successfully"
+    );
+  } catch (error) {
+    console.log(error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Failed to generate cover letter"
+    );
+  }
+};
+
+const generateQuestions = async () => {
+  try {
+
+    const { data } = await api.post(
+      "/api/ai/interview-questions",
+      {
+        resumeData
+      }
+    );
+
+    setInterviewQuestions(data);
+
+    toast.success(
+      "Interview Questions Generated"
+    );
+
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message ||
+      "Failed"
+    );
+  }
+};
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className='items-center justify-center'>
+      <div className="max-w-7xl mx-auto px-4  py-6 ">
         <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all'>
         <ArrowLeftIcon className='size-4'/>Back to Dashboard</Link>
       </div>
-      <div className='max-w-7xl mx-auto px-4 pb-8'>
-        <div className='grid lg:grid-cols-12 gap-8'>
+      <div className='max-w-[1800px] mx-auto px-4 pb-8'>
+        <div className='grid lg:grid-cols-12  gap-8'>
           {/* Left Panel - Form */}
-          <div className='relative lg:col-span-5 rounded-lg overflow-hidden'>
+          <div className='relative lg:col-span-4 rounded-lg overflow-hidden'>
             <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 pt-1'>
               {/* progress bar using activeSectionIndex */}
               <hr className='absolute top-0 left-0 right-0 border-2 border-gray-200'/>
@@ -179,7 +277,7 @@ const analyzeATS = async () => {
                   <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=>setResumeData(prev => ({...prev, template}))}/>
                     <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev =>({...prev, accent_color:color}))}/>
                 </div>
-                <div className='flex items-center'>
+                <div className='flex items-center bg-green-400 rounded-2xl text-white hover:bg-green-500'>
                   {activeSectionIndex !== 0 && (
                     <button onClick={()=>setActiveSectionIndex((prevIndex)=>Math.max(prevIndex - 1, 0))} className='flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50
                     transition-all' disabled={activeSectionIndex === 0}>
@@ -188,7 +286,7 @@ const analyzeATS = async () => {
                     </button>
                   )}
                   <button onClick={()=>setActiveSectionIndex((prevIndex)=>Math.min(prevIndex + 1, sections.length -1))} className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50
-                    transition-all ${activeSectionIndex === sections.length - 1 && 'opacity-50'}`} disabled={activeSectionIndex === length - 1}>Next
+                    transition-all ${activeSectionIndex === sections.length - 1 && 'opacity-50'}`} disabled={activeSectionIndex === sections.length - 1}>Next
                       <ChevronRight className='size-4'/>
                     </button>
 
@@ -196,7 +294,7 @@ const analyzeATS = async () => {
 
               </div>
 
-              <div className='space-y-6'>
+              <div className='space-y-6 w-full'>
                 {activeSection.id === 'personal' && (
                   <PersonalInfoForm data={resumeData.personal_info} onChange={(data)=>setResumeData(prev => ({...prev, personal_info:data}))} removeBackground={removeBackground}
                   setRemoveBackground={setRemoveBackground}/>
@@ -228,10 +326,7 @@ const analyzeATS = async () => {
                 )}
 
               </div>
-              <button onClick={()=>toast.promise(saveChanges, {loading: 'Saving...'})} className='bg-green-400 ring-green-300 text-green-600 ring hover:ring-green-600
-              transition-all rounded-md px-6 font-semibold py-2 mt-6 text-sm text-slate-700'>
-                Save Changes
-              </button>
+              <button onClick={saveChanges} className='bg-green-400 ring-green-300 text-green-600 ring hover:ring-green-600 transition-all rounded-md px-6 font-semibold py-2 mt-6 text-sm text-slate-700'>Save Changes</button>
 
 
             </div>
@@ -239,8 +334,8 @@ const analyzeATS = async () => {
           </div>
 
           {/* Right Panel - Preview */}
-          <div className='lg:col-span-7 max-lg:mt-6'>
-            <div className='relative w-full'>
+          <div className='lg:col-span-8 max-lg:mt-6'>
+            <div className='relative '>
               <div className='absolute bottom-3 left-0 right-0 flex items-center justify-end gap-2'>
                 {resumeData.public && (
                   <button onClick={handleShare} className='flex items-center p-2 px-4 gap-2 font-semibold text-xs
@@ -261,22 +356,144 @@ const analyzeATS = async () => {
 
               </div>
             </div>
-            {atsScore !== null && (
-  <div className="mb-4 bg-white rounded-lg shadow p-4">
-    <h2 className="text-xl font-bold mb-2">
-      ATS Score: {atsScore}/100
+
+            <div className="grid lg:grid-cols-10 gap-4">
+
+              <div className="lg:col-span-6">
+                <div id="resume-preview-container">
+                  <ResumePreview data={resumeData} template={resumeData.template} accentColor={resumeData.accent_color}/>
+                </div>
+              </div>
+
+              <div className="lg:col-span-4 space-y-4">
+
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h2 className="text-lg font-bold mb-2">Job Description Match</h2>
+                  <textarea
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    placeholder="Paste Job Description Here..."
+                    className="w-full border rounded-lg p-3 mb-3"
+                    rows={6}
+                  />
+                  <button
+                    onClick={analyzeJobMatch}
+                    className="bg-purple-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    Analyze Job Match
+                  </button>
+                </div>
+                <button
+  onClick={generateQuestions}
+  className="bg-orange-500 text-white px-4 py-2 rounded-lg"
+>
+  Interview Questions
+</button>
+
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h2 className="text-lg font-bold mb-3">AI Cover Letter Generator</h2>
+                  <input
+                    type="text"
+                    placeholder="Company Name"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="w-full border rounded-lg p-3 mb-3"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Job Title"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    className="w-full border rounded-lg p-3 mb-3"
+                  />
+                  <button
+                    onClick={generateCoverLetter}
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    Generate Cover Letter
+                  </button>
+                </div>
+
+                {atsScore !== null && (
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <h2 className="text-xl font-bold">ATS Score: {atsScore}/100</h2>
+                    <ul className="list-disc ml-5 mt-2">
+                      {atsSuggestions.map((item, index) => (
+                        <li key={index}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {jobMatch && (
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <h2 className="text-xl font-bold">Match Score: {jobMatch.matchScore}%</h2>
+                  </div>
+                )}
+
+                {coverLetter && (
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <h2 className="text-xl font-bold mb-2">Generated Cover Letter</h2>
+                    <textarea
+                      value={coverLetter}
+                      readOnly
+                      rows={15}
+                      className="w-full border rounded-lg p-3"
+                    />
+                  </div>
+                )}
+
+                {interviewQuestions && (
+  <div className="bg-white rounded-lg shadow p-4">
+
+    <h2 className="text-xl font-bold mb-3">
+      Interview Questions
     </h2>
 
-    <ul className="list-disc ml-6">
-      {atsSuggestions.map((item, index) => (
-        <li key={index}>{item}</li>
-      ))}
+    <h3 className="font-semibold">
+      Technical
+    </h3>
+
+    <ul className="list-disc ml-5 mb-3">
+      {interviewQuestions.technical?.map(
+        (q, i) => (
+          <li key={i}>{q}</li>
+        )
+      )}
     </ul>
+
+    <h3 className="font-semibold">
+      Project
+    </h3>
+
+    <ul className="list-disc ml-5 mb-3">
+      {interviewQuestions.project?.map(
+        (q, i) => (
+          <li key={i}>{q}</li>
+        )
+      )}
+    </ul>
+
+    <h3 className="font-semibold">
+      HR
+    </h3>
+
+    <ul className="list-disc ml-5">
+      {interviewQuestions.hr?.map(
+        (q, i) => (
+          <li key={i}>{q}</li>
+        )
+      )}
+    </ul>
+
   </div>
 )}
-            <div id="resume-preview-container">
-              <ResumePreview data={resumeData} template={resumeData.template} accentColor={resumeData.accent_color}/>
+
+              </div>
+
             </div>
+
+           
 
           </div>
 

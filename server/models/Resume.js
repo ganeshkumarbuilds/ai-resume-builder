@@ -19,38 +19,37 @@ const ResumeSchema = new mongoose.Schema({
     },
     experience: [
         {
-            company: {type: String},
-            positon: {type: String},
-            start_date: {type: String},
-            end_date: {type: String},
-            description: {type: String},
-            is_current: {type: Boolean},
+            company: { type: String },
+            positon: { type: String },
+            start_date: { type: String },
+            end_date: { type: String },
+            description: { type: String },
+            is_current: { type: Boolean },
         }
     ],
     projects:[
         {
-            name: {type: String},
-            type: {type: String},
-            description: {type: String},
+            name: { type: String },
+            type: { type: String },
+            description: { type: String },
             
         }
     ],
     atsScore: {
-  type: Number,
-  default: 0,
-},
-
-atsSuggestions: {
-  type: [String],
-  default: [],
-},
+        type: Number,
+        default: 0,
+    },
+    atsSuggestions: {
+        type: [String],
+        default: [],
+    },
     education:[
         {
-            institution: {type: String},
-            degree: {type: String},
-            field: {type: String},
-            graduation_date: {type: String},
-            gpa: {type: String},
+            institution: { type: String },
+            degree: { type: String },
+            field: { type: String },
+            graduation_date: { type: String },
+            gpa: { type: String },
         }
     ],
 }, {timestamps: true, minimize: false})

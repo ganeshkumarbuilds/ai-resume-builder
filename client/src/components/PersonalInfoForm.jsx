@@ -9,7 +9,7 @@ const Linked_in = ({ className }) => (
   </svg>
 )
 
-const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackground }) => {
+const PersonalInfoForm = ({ data, onChange, }) => {
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
   };
@@ -30,13 +30,7 @@ const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackgroun
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Personal Information</h2>
         <div className="flex items-center gap-2">
-  <span className="text-sm text-gray-600">Remove BG</span>
-  <div
-    onClick={() => setRemoveBackground(!removeBackground)}
-    className={`w-11 h-6 flex items-center rounded-full cursor-pointer transition-colors ${removeBackground ? 'bg-green-500' : 'bg-gray-300'}`}
-  >
-    <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${removeBackground ? 'translate-x-5' : 'translate-x-1'}`}/>
-  </div>
+  
 </div>
       </div>
 

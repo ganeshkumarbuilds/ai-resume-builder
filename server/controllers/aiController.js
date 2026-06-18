@@ -139,5 +139,188 @@ export const uploadResume = async (req, res) => {
     
 }
 
+export const generateCoverLetter = async (req, res) => {
+  try {
+    const {
+      companyName,
+      jobTitle,
+      jobDescription,
+      resumeData
+    } = req.body;
+
+    const prompt = `
+Generate a professional cover letter.
+
+Applicant Name: ${resumeData?.personal_info?.full_name}
+Profession: ${resumeData?.personal_info?.profession}
+
+Company Name: ${companyName}
+Job Title: ${jobTitle}
+
+Job Description:
+${jobDescription}
+
+Write a professional cover letter with:
+- Introduction
+- Relevant skills
+- Why interested in company
+- Professional closing
+
+Return only the cover letter.
+`;
+
+    const response = await ai.chat.completions.create({
+      model: process.env.OPENAI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert cover letter writer."
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
+    const coverLetter =
+      response.choices[0].message.content;
+
+    return res.status(200).json({
+      coverLetter,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const analyzeJobMatch = async (req, res) => {
+  try {
+    const { resumeData, jobDescription } = req.body;
+
+    if (!resumeData || !jobDescription) {
+      return res.status(400).json({
+        message: "Resume data and Job Description are required",
+      });
+    }
+
+    const prompt = `
+You are an ATS Resume Analyzer.
+
+Resume:
+${JSON.stringify(resumeData, null, 2)}
+
+Job Description:
+${jobDescription}
+
+Analyze the resume against the job description.
+
+Return ONLY valid JSON:
+
+{
+  "matchScore": 85,
+  "missingSkills": ["Docker", "AWS"],
+  "strengths": [
+    "Strong React experience",
+    "Relevant projects"
+  ],
+  "suggestions": [
+    "Add Docker skills",
+    "Mention AWS projects"
+  ]
+}
+`;
+
+    const response = await ai.chat.completions.create({
+      model: process.env.OPENAI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are an ATS resume analyzer.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      response_format: {
+        type: "json_object",
+      },
+    });
+
+    const result = JSON.parse(
+      response.choices[0].message.content
+    );
+
+    return res.status(200).json(result);
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const generateInterviewQuestions = async (req, res) => {
+  try {
+    const { resumeData } = req.body;
+
+    const prompt = `
+Generate interview questions based on this resume.
+
+Resume:
+${JSON.stringify(resumeData)}
+
+Return JSON only:
+
+{
+  "technical": [
+    "question1",
+    "question2"
+  ],
+  "project": [
+    "question1",
+    "question2"
+  ],
+  "hr": [
+    "question1",
+    "question2"
+  ]
+}
+`;
+
+    const response = await ai.chat.completions.create({
+      model: process.env.OPENAI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert technical interviewer. Return only JSON."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    const result = JSON.parse(
+      response.choices[0].message.content
+    );
+
+    return res.status(200).json(result);
+
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message
+    });
+  }
+};
 
 
