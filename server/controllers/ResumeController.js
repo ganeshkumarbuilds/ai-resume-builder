@@ -159,6 +159,8 @@ export const analyzeATS = async (req, res) => {
     const { resumeId } = req.params;
 
     const resume = await Resume.findById(resumeId);
+    console.log("ATS RESUME DATA:");
+console.log(JSON.stringify(resume, null, 2));
 
     if (!resume) {
       return res.status(404).json({
